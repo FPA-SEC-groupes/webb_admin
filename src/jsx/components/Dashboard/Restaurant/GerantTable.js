@@ -1,30 +1,47 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTable, useSortBy, usePagination } from 'react-table';
 import { Button, Modal, Form, FormCheck } from 'react-bootstrap';
+import { activateAccount, addModerator, getModerators } from '../../../../services/ModeratorService.js';
 
 const GerantTable = () => {
     const [show, setShow] = useState(false);
+    const [data, setData]= useState([]); 
     const [gerantData, setGerantData] = useState({
-        id: null,
         username: '',
         name: '',
         lastname: '',
         email: '',
         password: '',
         phone: '',
-        image: null,
         activated: false,
-        role: [],
-        zone: null
+        role: ["provider"],
     });
 
     const handleShow = () => setShow(true);
     const handleClose = () => setShow(false);
-    const handleSaveGerant = () => {
-        console.log('Saving gerant:', gerantData);
-        setShow(false);
+    const handleSaveGerant =async() => {
+        try{
+            await addModerator(gerantData);
+            fetchMaterials();
+            setShow(false);
+        }catch(e){
+            console.log(e);
+        }
+       
     };
-
+    useEffect(() => {
+        fetchMaterials();
+    }, []);
+    
+    const fetchMaterials = async () => {
+        try {
+            const response = await getModerators(); // Fetching data from the API
+            const materials = response
+            setData(materials); // Assuming you have a state 'setData' to hold your table data
+        } catch (error) {
+            console.error('Error fetching materials:', error.message);
+        }
+    };
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setGerantData(prev => ({
@@ -34,18 +51,13 @@ const GerantTable = () => {
     };
 
     const toggleGerantActivation = (id, isActive) => {
+        activateAccount(id);
         console.log(`Toggling activation for gerant ID ${id}: ${!isActive}`);
         setGerantData(prev => ({
             ...prev,
             activated: !isActive
         }));
     };
-
-    // Sample data
-    const data = useMemo(() => [
-        { id: 1, username: 'john_doe', name: 'John', lastname: 'Doe', email: 'johndoe@example.com', phone: '123-456-7890', activated: true },
-        { id: 2, username: 'jane_smith', name: 'Jane', lastname: 'Smith', email: 'janesmith@example.com', phone: '234-567-8901', activated: false }
-    ], []);
 
     const columns = useMemo(() => [
         { Header: 'ID', accessor: 'id' },
@@ -67,6 +79,7 @@ const GerantTable = () => {
             )
         }
     ], []);
+    
 
     const {
         getTableProps,
