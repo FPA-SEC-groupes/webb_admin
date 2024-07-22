@@ -36,6 +36,7 @@ import Zone from "./components/Dashboard/Restaurant/Zone";
 import CategoryPage from "./components/Dashboard/Restaurant/categories";
 import GerantTable from "./components/Dashboard/Restaurant/GerantTable";
 import UserTable from "./components/Dashboard/Restaurant/UserTable";
+import Restrictions from "./components/Dashboard/Restaurant/Restrictions"
 //Drivers
 import DeliverMain from './components/Dashboard/Drivers/DeliverMain';
 import DeliverOrder from './components/Dashboard/Drivers/DeliverOrder';
@@ -152,6 +153,7 @@ const Markup = () => {
     { url: "zone", component: <Zone /> },
     {url: "usertable", component: <UserTable /> },
     {url: "geranttable", component: <GerantTable /> },
+    {url: "restrictions", component: <Restrictions /> },
     {url: "category/:id_category", component: <CategoryPage  /> },
 
   

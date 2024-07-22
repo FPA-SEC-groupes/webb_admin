@@ -60,7 +60,7 @@ export const MenuList = [
         classsChange: 'mm-collapse',
         iconStyle: "bi bi-shop-window",
         content: [
-            {
+            /*{
                 title: 'Restaurant',
                 to: 'restaurant',
             },
@@ -79,7 +79,7 @@ export const MenuList = [
             {
                 title: 'Zone',
                 to: 'zone',
-            },
+            }, */
             {
                 title: 'User',
                 to: 'usertable',
@@ -87,6 +87,10 @@ export const MenuList = [
             {
                 title: 'Gerant',
                 to: 'geranttable',
+            },
+            {
+                title: 'Restrictions',
+                to: 'restrictions',
             },
 
 
