@@ -1,7 +1,12 @@
-import React,{useState, useEffect} from "react";
+import React,{useState, useEffect, useContext,useMemo} from "react";
+import { Button, Modal, Form, FormCheck } from 'react-bootstrap';
 import { Dropdown } from "react-bootstrap";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { Link } from "react-router-dom";
+import { fetchUserById } from '../../../services/profileService';
+import { useTable, useSortBy, usePagination } from 'react-table';
+
+
 /// Scroll
 //import PerfectScrollbar from "react-perfect-scrollbar";
 
@@ -12,6 +17,7 @@ import { Link } from "react-router-dom";
 import LogoutPage from './Logout';
 
 import HeaderSlider from './HeaderSlider';
+import { ThemeContext } from "../../../context/ThemeContext";
 
 
 //import avatar from "../../../images/avatar/1.jpg";
@@ -39,8 +45,69 @@ function  AddSearchSlider(){
 const Header = ({ onNote }) => {
 	//const [rightSelect, setRightSelect] = useState('Eng');
 	const [selectCountry, setSelectCountry] = useState([LocationIcon, 'India']);
+	const { changeBackground } = useContext(ThemeContext);
+	const [checked, setChecked] = useState(false);
+	const [error, setError] = useState('');
+	const [userDetails, setUserDetails] = useState({
+        id: '',  // Assuming ID might be editable, otherwise exclude from state
+        username: '',
+        name: '',
+        lastname: '',
+        email: '', 
+        phone: '',
+    });
+	const [gerantData, setGerantData] = useState({
+        username: '',
+        name: '',
+        lastname: '',
+        email: '',
+        password: '',
+        phone: '',
+        activated: false,
+        role: ["provider"],
+    });
 	//For fix header
 	const [headerFix, setheaderFix] = useState(false);
+	const handleSwitchChange = (nextChecked, setChecked, changeBackground) => {
+		setChecked(nextChecked);
+		if (nextChecked) {
+			changeBackground({ value: "dark", label: "Dark" });
+		} else {
+			changeBackground({ value: "light", label: "Light" });
+		}
+	};
+	const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setGerantData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    const toggleGerantActivation = (id, isActive) => {
+        // activateAccount(id);
+        console.log(`Toggling activation for gerant ID ${id}: ${!isActive}`);
+        setGerantData(prev => ({
+            ...prev,
+            activated: !isActive
+        }));
+    };
+
+    
+    
+	useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const fetchedUser = await fetchUserById();
+                setUserDetails(fetchedUser);
+            } catch (err) {
+                console.error('Failed to fetch user:', err);
+                setError('Failed to load user data');
+            }
+        };
+
+        fetchUserData();
+    }, []);
 	useEffect(() => {
 
 		setTimeout(function(){
@@ -170,14 +237,26 @@ const Header = ({ onNote }) => {
 										<img src={profile} alt="" />
 										<div className="d-flex align-items-center sidebar-info">
 											<div>
-												<h6 className="font-w500 mb-0 ms-2">Joshua</h6>
+												<h6 className="font-w500 mb-0 ms-2">{userDetails.username}</h6>
 											</div>	
 											<i className="fas fa-chevron-down"></i>
 										</div>
 										
 									</div>
+									
 								</Dropdown.Toggle>
 								<Dropdown.Menu className="dropdown-menu-end">
+								<Form>
+										<Form.Group className="mb-3 ms-2">
+											<Form.Check
+												type="checkbox"
+												// label="Is Active"
+												// name="activated"
+												checked={checked}
+												onChange={handleSwitchChange}
+											/>
+										</Form.Group>
+									</Form>
 								  {/*	<Link to="./app-profile" className="dropdown-item ai-icon ">
 										<svg  xmlns="http://www.w3.org/2000/svg" className="text-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
 										<span className="ms-2">Profile</span>
@@ -220,6 +299,7 @@ const Header = ({ onNote }) => {
 										<span className="ms-2">Settings </span>
 									</Link>*/}
 									<LogoutPage />
+									
 								</Dropdown.Menu>
 							</Dropdown>
 						</li>

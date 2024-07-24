@@ -1,29 +1,28 @@
 // Restrictions.js
 import React, { useState, useEffect } from 'react';
-import { Table, FormControl } from 'react-bootstrap';
+import { Table, FormControl, Button } from 'react-bootstrap';
+import { getAllRestrictions, deleteRestrictions } from '../../../../services/RestrictionsService';
 
 const Restrictions = () => {
     const [data, setData] = useState([]);
     const [filters, setFilters] = useState({
         id: '',
         description: '',
-        reservations_id: '',
-        user_id: ''
+        "Reservations Title": '',
+        Username: ''
     });
     const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
 
     useEffect(() => {
-        // Generate fake data
-        const fakeData = [];
-        for (let i = 1; i <= 10; i++) {
-            fakeData.push({
-                id: i,
-                description: `Description ${i}`,
-                reservations_id: Math.floor(Math.random() * 1000),
-                user_id: Math.floor(Math.random() * 1000)
-            });
-        }
-        setData(fakeData);
+        const fetchData = async () => {
+            try {
+                const restrictions = await getAllRestrictions();
+                setData(restrictions);
+            } catch (error) {
+                console.error('Error fetching restrictions:', error);
+            }
+        };
+        fetchData();
     }, []);
 
     const handleFilterChange = (event) => {
@@ -40,6 +39,15 @@ const Restrictions = () => {
             direction = 'desc';
         }
         setSortConfig({ key, direction });
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await deleteRestrictions(id);
+            setData(data.filter(item => item.id !== id));
+        } catch (error) {
+            console.error(`Error deleting restriction with ID ${id}:`, error);
+        }
     };
 
     const sortedData = React.useMemo(() => {
@@ -89,6 +97,7 @@ const Restrictions = () => {
                                 {key.charAt(0).toUpperCase() + key.slice(1)} {sortConfig.key === key && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                             </th>
                         ))}
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,8 +105,11 @@ const Restrictions = () => {
                         <tr key={item.id}>
                             <td>{item.id}</td>
                             <td>{item.description}</td>
-                            <td>{item.reservations_id}</td>
-                            <td>{item.user_id}</td>
+                            <td>{item.reservation.eventTitle}</td>
+                            <td>{item.user.username}</td>
+                            <td>
+                                <Button variant="danger" onClick={() => handleDelete(item.id)}>Delete</Button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
