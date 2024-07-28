@@ -50,6 +50,7 @@
     "react-select": "^5.7.0",
     "react-simple-maps": "^3.0.0",
     "react-sparklines": "^1.7.0",
+    "react-switch": "^7.0.0",
     "react-table": "^7.8.0",
     "react-time-picker": "^5.1.0",
     "react-toastify": "^9.1.1",

@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTable, useSortBy, usePagination } from 'react-table';
-import { Button, Modal, Form, FormCheck, Row } from 'react-bootstrap';
-import { activateAccount, addModerator, getModerators  ,updateUser } from '../../../../services/ModeratorService.js';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { Button, Modal, Form, FormCheck, FormControl, Row, Col, Table } from 'react-bootstrap';
+import { activateAccount, addModerator, getModerators } from '../../../../services/ModeratorService.js';
 
 const GerantTable = () => {
     const [show, setShow] = useState(false);
-    const [data, setData]= useState([]); 
+    const [data, setData] = useState([]);
     const [gerantData, setGerantData] = useState({
         username: '',
         name: '',
@@ -17,32 +16,36 @@ const GerantTable = () => {
         activated: false,
         role: ["provider"],
     });
+    const [filterValue, setFilterValue] = useState('');
+    const [filterColumn, setFilterColumn] = useState('');
+    const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
 
     const handleShow = () => setShow(true);
     const handleClose = () => setShow(false);
-    const handleSaveGerant =async() => {
-        try{
+    const handleSaveGerant = async () => {
+        try {
             await addModerator(gerantData);
             fetchMaterials();
             setShow(false);
-        }catch(e){
+        } catch (e) {
             console.log(e);
         }
-       
     };
+
     useEffect(() => {
         fetchMaterials();
     }, []);
-    
+
     const fetchMaterials = async () => {
         try {
-            const response = await getModerators(); // Fetching data from the API
-            const materials = response
-            setData(materials); // Assuming you have a state 'setData' to hold your table data
+            const response = await getModerators();
+            const materials = response;
+            setData(materials);
         } catch (error) {
             console.error('Error fetching materials:', error.message);
         }
     };
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setGerantData(prev => ({
@@ -51,46 +54,34 @@ const GerantTable = () => {
         }));
     };
 
-    const toggleGerantActivation = (id, isActive) => {
-        activateAccount(id);
-        console.log(`Toggling activation for gerant ID ${id}: ${!isActive}`);
-        setGerantData(prev => ({
-            ...prev,
-            activated: !isActive
-        }));
-    };
-    const handleUpdate = (user) => {
-        console.log(user);
-        setGerantData(user);
-        setShow(true);
-    };
-    const handleUpdateGerante=async()=>{
-       // Log to see what is being passed
-    console.log("Attempting to update user with:", gerantData);
-
-    // Create a new object that only contains the properties you need
-    const userDataToUpdate = {
-        id: gerantData.id,
-        username: gerantData.username,
-        name: gerantData.name,
-        lastname: gerantData.lastname,
-        email: gerantData.email,
-        phone: gerantData.phone,
-        activated: gerantData.activated,
-        role: gerantData.role
+    const toggleGerantActivation = async (id, isActive) => {
+        try {
+            await activateAccount(id);
+            console.log(`Toggling activation for gerant ID ${id}: ${!isActive}`);
+            setData(prevData => prevData.map(item => 
+                item.id === id ? { ...item, activated: !isActive } : item
+            ));
+        } catch (error) {
+            console.error('Error toggling activation:', error.message);
+        }
     };
 
-    // Now pass only this userDataToUpdate to avoid circular JSON issues
-    updateUser(userDataToUpdate)
-        .then(response => {
-            console.log("Update successful:", response);
-            fetchMaterials(); // Reload data
-            setShow(false);
-        })
-        .catch(error => {
-            console.error("Failed to update user:", error);
-        });
-    }
+    const handleFilterChange = (event) => {
+        setFilterValue(event.target.value);
+    };
+
+    const handleColumnChange = (event) => {
+        setFilterColumn(event.target.value);
+    };
+
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
     const columns = useMemo(() => [
         { Header: 'ID', accessor: 'id' },
         { Header: 'Username', accessor: 'username' },
@@ -123,7 +114,6 @@ const GerantTable = () => {
             )
         }
     ], []);
-    
 
     const {
         getTableProps,
@@ -139,13 +129,59 @@ const GerantTable = () => {
         state: { pageIndex, pageSize }
     } = useTable({ columns, data }, useSortBy, usePagination);
 
+    const sortedData = useMemo(() => {
+        let sortableData = [...data];
+        if (sortConfig.key) {
+            sortableData.sort((a, b) => {
+                if (a[sortConfig.key] < b[sortConfig.key]) {
+                    return sortConfig.direction === 'asc' ? -1 : 1;
+                }
+                if (a[sortConfig.key] > b[sortConfig.key]) {
+                    return sortConfig.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        return sortableData;
+    }, [data, sortConfig]);
+
+    const filteredData = sortedData.filter(item => {
+        if (!filterColumn || !filterValue) return true;
+        return item[filterColumn]?.toString().toLowerCase().includes(filterValue.toLowerCase());
+    });
+
     return (
         <>
+            <Row className="mb-3">
+                <Col>
+                    <FormControl
+                        type="text"
+                        placeholder="Filter value"
+                        value={filterValue}
+                        onChange={handleFilterChange}
+                    />
+                </Col>
+                <Col>
+                    <FormControl
+                        as="select"
+                        value={filterColumn}
+                        onChange={handleColumnChange}
+                    >
+                        <option value="">Select column to filter</option>
+                        {columns.map(column => (
+                            <option key={column.accessor} value={column.accessor}>
+                                {column.Header}
+                            </option>
+                        ))}
+                    </FormControl>
+                </Col>
+            </Row>
+
             <Button variant="primary" onClick={handleShow}>
                 Add Gerant
             </Button>
 
-            <table {...getTableProps()} className="table table-hover">
+            <Table striped bordered hover>
                 <thead>
                     {headerGroups.map(headerGroup => (
                         <tr {...headerGroup.getHeaderGroupProps()}>
@@ -178,9 +214,8 @@ const GerantTable = () => {
                         );
                     })}
                 </tbody>
-            </table>
+            </Table>
 
-            {/* Modal for adding or editing a gerant */}
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add/Edit Gerant</Modal.Title>
@@ -211,7 +246,6 @@ const GerantTable = () => {
                             <Form.Label>Activated</Form.Label>
                             <Form.Check type="checkbox" label="Is Active" name="activated" checked={gerantData.activated} onChange={handleChange} />
                         </Form.Group>
-                        {/* For image, role, and zone, you will need to handle file upload and selection differently */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>

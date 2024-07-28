@@ -1,17 +1,23 @@
-// Restrictions.js
 import React, { useState, useEffect } from 'react';
-import { Table, FormControl, Button } from 'react-bootstrap';
+import { Table, FormControl, Button, Row, Col } from 'react-bootstrap';
 import { getAllRestrictions, deleteRestrictions } from '../../../../services/RestrictionsService';
 
 const Restrictions = () => {
     const [data, setData] = useState([]);
     const [filters, setFilters] = useState({
         id: '',
-        // description: '',
+        description: '',
         "Reservations Title": '',
         Username: ''
     });
     const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
+
+    const columns = {
+        id: 'ID',
+        description: 'Description',
+        "Reservations Title": 'Reservations Title',
+        Username: 'Username'
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,11 +32,11 @@ const Restrictions = () => {
     }, []);
 
     const handleFilterChange = (event) => {
-        const { name, value } = event.target;
-        setFilters(prevFilters => ({
-            ...prevFilters,
-            [name]: value
-        }));
+        setFilterValue(event.target.value);
+    };
+
+    const handleColumnChange = (event) => {
+        setFilterColumn(event.target.value);
     };
 
     const handleSort = (key) => {
@@ -67,34 +73,43 @@ const Restrictions = () => {
     }, [data, sortConfig]);
 
     const filteredData = sortedData.filter(item => {
-        return Object.keys(filters).every(key => {
-            if (!filters[key]) return true;
-            return item[key].toString().toLowerCase().includes(filters[key].toLowerCase());
-        });
+        if (!filterColumn || !filterValue) return true;
+        return item[filterColumn]?.toString().toLowerCase().includes(filterValue.toLowerCase());
     });
 
     return (
         <div>
             <h1>Restrictions</h1>
+            <Row className="mb-3">
+                <Col>
+                    <FormControl
+                        type="text"
+                        placeholder="Filter value"
+                        value={filterValue}
+                        onChange={handleFilterChange}
+                    />
+                </Col>
+                <Col>
+                    <FormControl
+                        as="select"
+                        value={filterColumn}
+                        onChange={handleColumnChange}
+                    >
+                        <option value="">Select column to filter</option>
+                        {Object.keys(columns).map((key) => (
+                            <option key={key} value={key}>
+                                {columns[key]}
+                            </option>
+                        ))}
+                    </FormControl>
+                </Col>
+            </Row>
             <Table striped bordered hover>
                 <thead>
                     <tr>
-                        {Object.keys(filters).map((key) => (
-                            <th key={key}>
-                                <FormControl
-                                    type="text"
-                                    placeholder={`Filter by ${key.charAt(0).toUpperCase() + key.slice(1)}`}
-                                    name={key}
-                                    value={filters[key]}
-                                    onChange={handleFilterChange}
-                                />
-                            </th>
-                        ))}
-                    </tr>
-                    <tr>
-                        {Object.keys(filters).map((key) => (
+                        {Object.keys(columns).map((key) => (
                             <th key={key} onClick={() => handleSort(key)}>
-                                {key.charAt(0).toUpperCase() + key.slice(1)} {sortConfig.key === key && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                {columns[key]} {sortConfig.key === key && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                             </th>
                         ))}
                         <th>Actions</th>
