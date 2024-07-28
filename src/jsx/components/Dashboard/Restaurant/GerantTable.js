@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTable, useSortBy, usePagination } from 'react-table';
 import { Button, Modal, Form, FormCheck, FormControl, Row, Col, Table } from 'react-bootstrap';
-import { activateAccount, addModerator, getModerators } from '../../../../services/ModeratorService.js';
-
+import { activateAccount, addModerator, getModerators, updateUser } from '../../../../services/ModeratorService.js';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 const GerantTable = () => {
     const [show, setShow] = useState(false);
     const [data, setData] = useState([]);
@@ -95,7 +95,6 @@ const GerantTable = () => {
             Cell: ({ row }) => (
                 <div style={{ textAlign: 'left' }}>
                     
-                <Button variant="" onClick={(e) => { e.stopPropagation(); handleUpdate(); }}>
                                     {/* <FaEdit /> */}
                                     <FormCheck
                                         type="switch"
@@ -103,7 +102,6 @@ const GerantTable = () => {
                                         checked={row.original.activated}
                                         onChange={() => toggleGerantActivation(row.original.id, row.original.activated)}
                                     />
-                                </Button>
                                 <Button variant="outline-primary" onClick={(e) => { 
                                         e.stopPropagation(); 
                                         handleUpdate(row.original);  // Pass the entire row data to handleUpdate
@@ -144,7 +142,33 @@ const GerantTable = () => {
         }
         return sortableData;
     }, [data, sortConfig]);
-
+    const handleUpdate = (user) => {
+        // Log to see what is being passed
+        console.log("Attempting to update user with:", user);
+    
+        // Create a new object that only contains the properties you need
+        const userDataToUpdate = {
+            id: user.id,
+            username: user.username,
+            name: user.name,
+            lastname: user.lastname,
+            email: user.email,
+            phone: user.phone,
+            activated: user.activated,
+            role: user.role
+        };
+    
+        // Now pass only this userDataToUpdate to avoid circular JSON issues
+        updateUser(userDataToUpdate)
+            .then(response => {
+                console.log("Update successful:", response);
+                fetchMaterials(); // Reload data
+                setShow(false);
+            })
+            .catch(error => {
+                console.error("Failed to update user:", error);
+            });
+    };
     const filteredData = sortedData.filter(item => {
         if (!filterColumn || !filterValue) return true;
         return item[filterColumn]?.toString().toLowerCase().includes(filterValue.toLowerCase());
@@ -252,7 +276,7 @@ const GerantTable = () => {
                     <Button variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
-                    <Button variant="primary" onClick={gerantData.id ? handleUpdateGerante : handleSaveGerant}>{gerantData.id ? 'Update  Gerant' : 'Save Gerant'}</Button>
+                    <Button variant="primary" onClick={gerantData.id ? handleUpdate  : handleSaveGerant}>{gerantData.id ? 'Update  Gerant' : 'Save Gerant'}</Button>
                     {/* <Button variant="primary" onClick={handleSaveGerant}>
                         Save Gerant
                     </Button> */}
