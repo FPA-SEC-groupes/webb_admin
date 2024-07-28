@@ -64,3 +64,19 @@ export const activateAccount = async (user) => {
         throw error;
     }
 };
+export const updateUser = async (user) => {
+    const url = '/users/update';
+    console.log("Updating user with data:", user); // Log to see what's being sent
+    try {
+        const response = await axios.put(url, user);
+        if (response.status === 200) {
+            console.log('User updated successfully:', response.data);
+            return response.data;
+        } else {
+            throw new Error(`Failed to update user: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Failed to update user:', error.response ? error.response.data : error);
+        throw error;
+    }
+};

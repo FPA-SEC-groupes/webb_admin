@@ -7,7 +7,7 @@ const Restrictions = () => {
     const [data, setData] = useState([]);
     const [filters, setFilters] = useState({
         id: '',
-        description: '',
+        // description: '',
         "Reservations Title": '',
         Username: ''
     });
@@ -104,7 +104,7 @@ const Restrictions = () => {
                     {filteredData.map(item => (
                         <tr key={item.id}>
                             <td>{item.id}</td>
-                            <td>{item.description}</td>
+                            {/* <td>{item.description}</td> */}
                             <td>{item.reservation.eventTitle}</td>
                             <td>{item.user.username}</td>
                             <td>

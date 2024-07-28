@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTable, useSortBy, usePagination } from 'react-table';
-import { Button, Modal, Form, FormCheck } from 'react-bootstrap';
-import { activateAccount, addModerator, getModerators } from '../../../../services/ModeratorService.js';
+import { Button, Modal, Form, FormCheck, Row } from 'react-bootstrap';
+import { activateAccount, addModerator, getModerators  ,updateUser } from '../../../../services/ModeratorService.js';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 const GerantTable = () => {
     const [show, setShow] = useState(false);
@@ -58,7 +59,38 @@ const GerantTable = () => {
             activated: !isActive
         }));
     };
+    const handleUpdate = (user) => {
+        console.log(user);
+        setGerantData(user);
+        setShow(true);
+    };
+    const handleUpdateGerante=async()=>{
+       // Log to see what is being passed
+    console.log("Attempting to update user with:", gerantData);
 
+    // Create a new object that only contains the properties you need
+    const userDataToUpdate = {
+        id: gerantData.id,
+        username: gerantData.username,
+        name: gerantData.name,
+        lastname: gerantData.lastname,
+        email: gerantData.email,
+        phone: gerantData.phone,
+        activated: gerantData.activated,
+        role: gerantData.role
+    };
+
+    // Now pass only this userDataToUpdate to avoid circular JSON issues
+    updateUser(userDataToUpdate)
+        .then(response => {
+            console.log("Update successful:", response);
+            fetchMaterials(); // Reload data
+            setShow(false);
+        })
+        .catch(error => {
+            console.error("Failed to update user:", error);
+        });
+    }
     const columns = useMemo(() => [
         { Header: 'ID', accessor: 'id' },
         { Header: 'Username', accessor: 'username' },
@@ -70,12 +102,24 @@ const GerantTable = () => {
             Header: 'Activated',
             accessor: 'activated',
             Cell: ({ row }) => (
-                <FormCheck
-                    type="switch"
-                    id={`switch-${row.original.id}`}
-                    checked={row.original.activated}
-                    onChange={() => toggleGerantActivation(row.original.id, row.original.activated)}
-                />
+                <div style={{ textAlign: 'left' }}>
+                    
+                <Button variant="" onClick={(e) => { e.stopPropagation(); handleUpdate(); }}>
+                                    {/* <FaEdit /> */}
+                                    <FormCheck
+                                        type="switch"
+                                        id={`switch-${row.original.id}`}
+                                        checked={row.original.activated}
+                                        onChange={() => toggleGerantActivation(row.original.id, row.original.activated)}
+                                    />
+                                </Button>
+                                <Button variant="outline-primary" onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        handleUpdate(row.original);  // Pass the entire row data to handleUpdate
+                                    }}>
+                        <FaEdit />
+                    </Button>
+                </div>
             )
         }
     ], []);
@@ -174,9 +218,10 @@ const GerantTable = () => {
                     <Button variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
-                    <Button variant="primary" onClick={handleSaveGerant}>
+                    <Button variant="primary" onClick={gerantData.id ? handleUpdateGerante : handleSaveGerant}>{gerantData.id ? 'Update  Gerant' : 'Save Gerant'}</Button>
+                    {/* <Button variant="primary" onClick={handleSaveGerant}>
                         Save Gerant
-                    </Button>
+                    </Button> */}
                 </Modal.Footer>
             </Modal>
         </>
