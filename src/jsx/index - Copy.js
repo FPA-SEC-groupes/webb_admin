@@ -32,7 +32,7 @@ import Withdrow from './components/Dashboard/Restaurant/Withdrow';
 import Menu from './components/Dashboard/Restaurant/Menu';
 import Orders from './components/Dashboard/Restaurant/Orders';
 import CustomerReviews from './components/Dashboard/Restaurant/CustomerReviews';
-
+import RestaurantTable from "./components/Dashboard/Restaurant/RestaurantTable";
 //Drivers
 import DeliverMain from './components/Dashboard/Drivers/DeliverMain';
 import DeliverOrder from './components/Dashboard/Drivers/DeliverOrder';
@@ -178,6 +178,7 @@ const Markup = () => {
     { url: "menu", component: <Menu /> },
     { url: "orders", component: <Orders /> },
     { url: "customer-reviews", component: <CustomerReviews /> },
+    { url: "restauranttable", component: <RestaurantTable /> },
     
 
     //Drivers

@@ -1,21 +1,30 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTable, useSortBy, usePagination } from 'react-table';
 import { Button, Modal, Form, FormCheck, FormControl, Row, Col, Table } from 'react-bootstrap';
-import { activateAccount, addModerator, getModerators, updateUser } from '../../../../services/ModeratorService.js';
 import { FaEdit } from 'react-icons/fa';
 
-const GerantTable = () => {
+// Placeholder function to mimic fetching data from a service
+const fetchData = async () => {
+    return [
+        { id: 1, nom: 'John', prenom: 'Doe', phone: '1234567890', email: 'john.doe@example.com', sujet: 'Reservation', nomRestaurant: 'Le Gourmet', emplacement: 'Paris', description: 'Birthday celebration', date: '2024-09-01' },
+        { id: 2, nom: 'Jane', prenom: 'Smith', phone: '0987654321', email: 'jane.smith@example.com', sujet: 'Booking', nomRestaurant: 'Chez Pierre', emplacement: 'Lyon', description: 'Business meeting', date: '2024-09-10' },
+        // Add more fake data as needed
+    ];
+};
+
+const RestaurantTable = () => {
     const [show, setShow] = useState(false);
     const [data, setData] = useState([]);
-    const [gerantData, setGerantData] = useState({
-        username: '',
-        name: '',
-        lastname: '',
-        email: '',
-        password: '',
+    const [entryData, setEntryData] = useState({
+        nom: '',
+        prenom: '',
         phone: '',
-        activated: false,
-        role: ["provider"],
+        email: '',
+        sujet: '',
+        nomRestaurant: '',
+        emplacement: '',
+        description: '',
+        date: '',
     });
     const [filterValue, setFilterValue] = useState('');
     const [filterColumn, setFilterColumn] = useState('');
@@ -23,10 +32,12 @@ const GerantTable = () => {
 
     const handleShow = () => setShow(true);
     const handleClose = () => setShow(false);
-    const handleSaveGerant = async () => {
+
+    const handleSaveEntry = async () => {
+        // Simulate saving entry to the service
         try {
-            await addModerator(gerantData);
-            fetchMaterials();
+            // Add entryData to data list (mocking the save functionality)
+            setData(prevData => [...prevData, { id: prevData.length + 1, ...entryData }]);
             setShow(false);
         } catch (e) {
             console.log(e);
@@ -34,69 +45,31 @@ const GerantTable = () => {
     };
 
     useEffect(() => {
-        fetchMaterials();
+        fetchInitialData();
     }, []);
 
-    const fetchMaterials = async () => {
+    const fetchInitialData = async () => {
         try {
-            const response = await getModerators();
-            const materials = response;
-            setData(materials);
+            const fetchedData = await fetchData();
+            setData(fetchedData);
         } catch (error) {
-            console.error('Error fetching materials:', error.message);
+            console.error('Error fetching data:', error.message);
         }
     };
 
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setGerantData(prev => ({
+        const { name, value } = e.target;
+        setEntryData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: value,
         }));
     };
 
-    const toggleGerantActivation = async (id, isActive) => {
-        try {
-            await activateAccount(id);
-            console.log(`Toggling activation for gerant ID ${id}: ${!isActive}`);
-            setData(prevData => prevData.map(item => 
-                item.id === id ? { ...item, activated: !isActive } : item
-            ));
-        } catch (error) {
-            console.error('Error toggling activation:', error.message);
-        }
-    };
-    const update =(user)=>{
-        setGerantData(user)
-        setShow(true);
-    }
     const handleUpdate = (user) => {
-        // Log to see what is being passed
-        console.log("Attempting to update user with:", user);
-    
-        // Create a new object that only contains the properties you need
-        const userDataToUpdate = {
-            id: user.id,
-            username: user.username,
-            name: user.name,
-            lastname: user.lastname,
-            email: user.email,
-            phone: user.phone,
-            activated: user.activated,
-            role: user.role
-        };
-    
-        // Now pass only this userDataToUpdate to avoid circular JSON issues
-        updateUser(userDataToUpdate)
-            .then(response => {
-                console.log("Update successful:", response);
-                fetchMaterials(); // Reload data
-                setShow(false);
-            })
-            .catch(error => {
-                console.error("Failed to update user:", error);
-            });
-        };
+        setEntryData(user);
+        setShow(true);
+    };
+
     const handleFilterChange = (event) => {
         setFilterValue(event.target.value);
     };
@@ -114,35 +87,23 @@ const GerantTable = () => {
     };
 
     const columns = useMemo(() => [
-        { Header: 'ID', accessor: 'id' },
-        { Header: 'Username', accessor: 'username' },
-        { Header: 'First Name', accessor: 'name' },
-        { Header: 'Last Name', accessor: 'lastname' },
+        { Header: 'Nom', accessor: 'nom' },
+        { Header: 'Prénom', accessor: 'prenom' },
+        { Header: 'Numéro de Téléphone', accessor: 'phone' },
         { Header: 'Email', accessor: 'email' },
-        { Header: 'Phone', accessor: 'phone' },
+        { Header: 'Sujet', accessor: 'sujet' },
+        { Header: 'Nom du Restaurant', accessor: 'nomRestaurant' },
+        { Header: 'Emplacement', accessor: 'emplacement' },
+        { Header: 'Description', accessor: 'description' },
+        { Header: 'Date', accessor: 'date' },
         {
-            Header: 'Activated',
-            accessor: 'activated',
+            Header: 'Actions',
+            accessor: 'actions',
             Cell: ({ row }) => (
-                <div style={{ textAlign: 'left' }}>
-                    
-                <Button variant="" onClick={(e) => { e.stopPropagation(); handleUpdate(); }}>
-                                    {/* <FaEdit /> */}
-                                    <FormCheck
-                                        type="switch"
-                                        id={`switch-${row.original.id}`}
-                                        checked={row.original.activated}
-                                        onChange={() => toggleGerantActivation(row.original.id, row.original.activated)}
-                                    />
-                                </Button>
-                                <Button variant="outline-primary" onClick={(e) => { 
-                                        e.stopPropagation(); 
-                                        update(row.original);  // Pass the entire row data to handleUpdate
-                                    }}>
-                        <FaEdit />
-                    </Button>
-                </div>
-            )
+                <Button variant="outline-primary" onClick={() => handleUpdate(row.original)}>
+                    <FaEdit />
+                </Button>
+            ),
         }
     ], []);
 
@@ -207,12 +168,12 @@ const GerantTable = () => {
                     </FormControl>
                 </Col>
             </Row>
-
+{/*
             <Button variant="primary" onClick={handleShow}>
-                Add Gerant
+                Add Entry
             </Button>
-
-            <Table striped bordered hover>
+*/}
+            <Table striped bordered hover {...getTableProps()}>
                 <thead>
                     {headerGroups.map(headerGroup => (
                         <tr {...headerGroup.getHeaderGroupProps()}>
@@ -249,33 +210,45 @@ const GerantTable = () => {
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add/Edit Gerant</Modal.Title>
+                    <Modal.Title>Add/Edit Entry</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Username</Form.Label>
-                            <Form.Control type="text" placeholder="Enter username" name="username" value={gerantData.username} onChange={handleChange} />
+                            <Form.Label>Nom</Form.Label>
+                            <Form.Control type="text" placeholder="Enter Nom" name="nom" value={entryData.nom} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>First Name</Form.Label>
-                            <Form.Control type="text" placeholder="Enter first name" name="name" value={gerantData.name} onChange={handleChange} />
+                            <Form.Label>Prénom</Form.Label>
+                            <Form.Control type="text" placeholder="Enter Prénom" name="prenom" value={entryData.prenom} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Last Name</Form.Label>
-                            <Form.Control type="text" placeholder="Enter last name" name="lastname" value={gerantData.lastname} onChange={handleChange} />
+                            <Form.Label>Numéro de Téléphone</Form.Label>
+                            <Form.Control type="text" placeholder="Enter Phone" name="phone" value={entryData.phone} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Email</Form.Label>
-                            <Form.Control type="email" placeholder="Enter email" name="email" value={gerantData.email} onChange={handleChange} />
+                            <Form.Control type="email" placeholder="Enter Email" name="email" value={entryData.email} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Phone</Form.Label>
-                            <Form.Control type="text" placeholder="Enter phone number" name="phone" value={gerantData.phone} onChange={handleChange} />
+                            <Form.Label>Sujet</Form.Label>
+                            <Form.Control type="text" placeholder="Enter Sujet" name="sujet" value={entryData.sujet} onChange={handleChange} />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Activated</Form.Label>
-                            <Form.Check type="checkbox" label="Is Active" name="activated" checked={gerantData.activated} onChange={handleChange} />
+                            <Form.Label>Nom du Restaurant</Form.Label>
+                            <Form.Control type="text" placeholder="Enter Nom du Restaurant" name="nomRestaurant" value={entryData.nomRestaurant} onChange={handleChange} />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Emplacement</Form.Label>
+                            <Form.Control type="text" placeholder="Enter Emplacement" name="emplacement" value={entryData.emplacement} onChange={handleChange} />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control as="textarea" placeholder="Enter Description" name="description" value={entryData.description} onChange={handleChange} />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Date</Form.Label>
+                            <Form.Control type="date" name="date" value={entryData.date} onChange={handleChange} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
@@ -283,14 +256,13 @@ const GerantTable = () => {
                     <Button variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
-                    <Button variant="primary" onClick={gerantData.id ? handleUpdate : handleSaveGerant}>{gerantData.id ? 'Update  Gerant' : 'Save Gerant'}</Button>
-                    {/* <Button variant="primary" onClick={handleSaveGerant}>
-                        Save Gerant
-                    </Button> */}
+                    <Button variant="primary" onClick={handleSaveEntry}>
+                        {entryData.id ? 'Update Entry' : 'Save Entry'}
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </>
     );
 };
 
-export default GerantTable;
+export default RestaurantTable;

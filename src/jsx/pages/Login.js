@@ -1,23 +1,18 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { loadingToggleAction,loginAction,} from '../../store/actions/AuthActions';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { loadingToggleAction, loginAction } from '../../store/actions/AuthActions';
+import logo1 from '../../images/logo1.png';
 
-//
-import axios from 'axios';
-import logo from '../../images/logo-full.png'
-import bgimage from '../../images/login-img/pic-5.jpg';
-
-function Login (props) {
-	const navigate = useNavigate();
-    const [email, setEmail] = useState('demo@example.com');
+function Login(props) {
+    const navigate = useNavigate();
+    const [email, setEmail] = useState('admin');
     let errorsObj = { email: '', password: '' };
     const [errors, setErrors] = useState(errorsObj);
-    const [password, setPassword] = useState('123456');
-	const [errorMessages, setErrorMessages] = useState({});
+    const [password, setPassword] = useState('12345678');
     const dispatch = useDispatch();
 
-    async function onLogin (e)  {
+    async function onLogin(e) {
         e.preventDefault();
         let error = false;
         const errorObj = { ...errorsObj };
@@ -30,102 +25,64 @@ function Login (props) {
             error = true;
         }
         setErrors(errorObj);
-        if (error) {
-			return ;
-		}
-		
-		
-		dispatch(loadingToggleAction(true));
+        if (error) return;
 
-		dispatch(loginAction(email, password, navigate));
-		
-		/* dispatch(loginAction(email, password, props.history)).then((result) => {
-			if(typeof(result) != 'undefined' && result != null && result.registered == true){
-				navigate('/dashboard');
-			}
-		}); */
-		
-		//navigate('/dashboard');
+        dispatch(loadingToggleAction(true));
+        dispatch(loginAction(email, password, navigate));
     }
 
-  return (
-        
-        
-                
-		<div className="container mt-0">
-			<div className="row  align-items-center justify-contain-center bg-login">
-				<div className="col-xl-12 mt-5">
-					<div className="card border-0">
-						<div className="card-body login-bx">
-							<div className="row mt-5">
-								<div className="col-xl-8 col-md-6  text-center">
-									<img src={bgimage} className="food-img" alt="" />
-								</div>
-								<div className="col-xl-4 col-md-6 pe-0">
-									<div className="sign-in-your">
-										<div className="text-center mb-3">
-									  {/*<img src={logo} className="mb-3" alt="" />*/}	
-											<h4 className="fs-20 font-w800 text-black">Create an Account</h4>
-											<span className="dlab-sign-up">Sign Up</span>
-										</div>
-										{props.errorMessage && (
-											<div className='bg-red-300 text-red-900 border border-red-900 p-1 my-2'>
-												{props.errorMessage}
-											</div>
-										)}
-										{props.successMessage && (
-											<div className='bg-green-300 text-green-900 border border-green-900 p-1 my-2'>
-												{props.successMessage}
-											</div>
-										)}
-										<form onSubmit={onLogin}>
-											<div className="mb-3">
-												<label className="mb-1"><strong>Email Address</strong></label>
-												<input type="text" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
-												{errors.email && <div className="text-danger fs-12">{errors.email}</div>}
-											</div>
-											<div className="mb-3">
-												<label className="mb-1"><strong>Password</strong></label>
-												<input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} />
-													{errors.password && <div className="text-danger fs-12">{errors.password}</div>}
-											</div>
-											<div className="row d-flex justify-content-between mt-4 mb-2">
-												<div className="mb-3">
-													<div className="form-check custom-checkbox ms-1">
-														<input type="checkbox" className="form-check-input" id="basic_checkbox_1" />
-														<label className="form-check-label" htmlFor="basic_checkbox_1">Remember my preference</label>
-													</div>
-												</div>
-												{/* <div className="mb-3">
-													<Link to="/page-register">Sign up</Link>
-												</div> */}
-											</div>
-											<div className="text-center">
-												<button type="submit" className="btn btn-primary btn-block">Sign Me In</button>
-											</div>
-										</form>
-										  {/*
-										<div className="text-center my-3">
-											<span className="dlab-sign-up style-1">Continue With</span>
-										</div>
-										<div className="mb-3 dlab-signup-icon">
-											<button className="btn btn-outline-light me-1"><i className="fa-brands fa-facebook me-2 facebook"></i>Facebook</button>
-											<button className="btn btn-outline-light me-1"><i className="fa-brands fa-google me-2 google"></i>Google</button>
-											<button className="btn btn-outline-light mt-lg-0 mt-md-1 mt-sm-0 mt-1 linked-btn"><i className="fa-brands fa-linkedin me-2 likedin"></i>linkedin</button>
-										</div>
-										<div className="text-center">
-											<span>Don't have an account <NavLink to="/page-register" className="text-primary"> Sign up</NavLink></span>
-										</div>*/}
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-            
-    )
+    return (
+        <div className="authincation h-100">
+            <div className="container h-100">
+                <div className="row justify-content-center h-100 align-items-center">
+                    <div className="col-md-6">
+                        <div className="authincation-content">
+                            <div className="row no-gutters">
+                                <div className="col-xl-12">
+                                    <div className="auth-form">
+                                        <div className="text-center mb-3">
+                                            <NavLink to="/dashboard">
+                                                <img src={logo1} alt="Brand Logo" />
+                                            </NavLink>
+                                        </div>
+                                        <h4 className="text-center mb-4">Sign In</h4>
+                                        <form onSubmit={onLogin}>
+                                            <div className="mb-3">
+                                                <label><strong>Email Address</strong></label>
+                                                <input type="text" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                                {errors.email && <div className="text-danger">{errors.email}</div>}
+                                            </div>
+                                            <div className="mb-3">
+                                                <label><strong>Password</strong></label>
+                                                <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} />
+                                                {errors.password && <div className="text-danger">{errors.password}</div>}
+                                            </div>
+                                            <div className="text-center">
+                                                <button type="submit" className="btn btn-primary btn-block">Sign Me In</button>
+                                            </div>
+                                        </form>
+                                        <div className="text-center mt-3">
+                                            <span>Forget your password? <NavLink to="/page-forgot-password" className="text-primary"> Click here</NavLink></span>
+                                        </div>
+                                        {props.errorMessage && (
+                                            <div className='bg-red-300 text-red-900 border border-red-900 p-1 my-2'>
+                                                {props.errorMessage}
+                                            </div>
+                                        )}
+                                        {props.successMessage && (
+                                            <div className='bg-green-300 text-green-900 border border-green-900 p-1 my-2'>
+                                                {props.successMessage}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 const mapStateToProps = (state) => {
@@ -135,4 +92,5 @@ const mapStateToProps = (state) => {
         showLoading: state.auth.showLoading,
     };
 };
+
 export default connect(mapStateToProps)(Login);

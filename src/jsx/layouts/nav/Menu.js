@@ -92,6 +92,10 @@ export const MenuList = [
                 title: 'Restrictions',
                 to: 'restrictions',
             },
+            {
+                title: 'RestaurantTable',
+                to: 'restauranttable',
+            },
 
 
         ]

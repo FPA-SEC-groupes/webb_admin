@@ -37,6 +37,7 @@ import CategoryPage from "./components/Dashboard/Restaurant/categories";
 import GerantTable from "./components/Dashboard/Restaurant/GerantTable";
 import UserTable from "./components/Dashboard/Restaurant/UserTable";
 import Restrictions from "./components/Dashboard/Restaurant/Restrictions"
+import RestaurantTable from "./components/Dashboard/Restaurant/RestaurantTable";
 //Drivers
 import DeliverMain from './components/Dashboard/Drivers/DeliverMain';
 import DeliverOrder from './components/Dashboard/Drivers/DeliverOrder';
@@ -155,6 +156,7 @@ const Markup = () => {
     {url: "geranttable", component: <GerantTable /> },
     {url: "restrictions", component: <Restrictions /> },
     {url: "category/:id_category", component: <CategoryPage  /> },
+    { url: "restauranttable", component: <RestaurantTable /> },
 
   
 
